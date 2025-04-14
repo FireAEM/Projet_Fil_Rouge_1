@@ -5,6 +5,7 @@ const bcrypt = require('bcrypt');
 
 
 const Utilisateur = require('./models/utilisateur');
+const Categorie = require('./models/categorie');
 
 
 
@@ -125,6 +126,55 @@ app.get('/utilisateur/:id_utilisateur/role', async (req, res) => {
         } else {
             res.status(404).json({ message: "Utilisateur non trouvé" });
         }
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+
+
+//EndPoint type_etablissement
+
+app.post('/categorie', async (req, res) => {
+    try {
+        const newCategorie = await Categorie.createCategorie(req.body);
+        res.status(201).json({ newCategorie });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+app.get('/categorie', async (req, res) => {
+    try {
+        const categories = await Categorie.getAllCategorie();
+        res.status(200).json(categories);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+app.get('/categorie/:id_categorie', async (req, res) => {
+    try {
+        const categorie = await Categorie.getCategorieById(req.params.id_categorie);
+        categorie ? res.status(200).json(categorie) : res.status(404).json({ message: "Catégorie non trouvée" });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+app.put('/categorie/:id_categorie', async (req, res) => {
+    try {
+        const updatedCategorie = await Categorie.updateCategorie(req.params.id_categorie, req.body);
+        res.status(200).json({ updatedCategorie });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+app.delete('/categorie/:id_categorie', async (req, res) => {
+    try {
+        await Categorie.deleteCategorie(req.params.id_categorie);
+        res.status(204).send();
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
