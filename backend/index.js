@@ -8,6 +8,7 @@ const Utilisateur = require('./models/utilisateur');
 const Categorie = require('./models/categorie');
 const Annonce = require('./models/annonce');
 const Favori = require('./models/favori');
+const Message = require('./models/message');
 
 
 
@@ -301,6 +302,85 @@ app.put('/favori/:id_favori', async (req, res) => {
 app.delete('/favori/:id_favori', async (req, res) => {
     try {
         await Favori.deleteFavori(req.params.id_favori);
+        res.status(204).send();
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+
+
+//EndPoint favori
+
+app.get('/message', async (req, res) => {
+    try {
+        const messages = await Message.getAllMessages();
+        res.status(200).json(messages);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+app.get('/message/:id_message', async (req, res) => {
+    try {
+        const message = await Message.getMessageById(req.params.id_message);
+        message ? res.status(200).json(message) : res.status(404).json({ message: "Message non trouvé" });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+app.get('/message/expediteur/:id_expediteur', async (req, res) => {
+    try {
+        const messages = await Message.getMessagesByExpediteur(req.params.id_expediteur);
+        messages.length > 0 ? res.status(200).json(messages) : res.status(404).json({ message: "Aucun message trouvé pour cet expéditeur" });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+app.get('/message/recepteur/:id_recepteur', async (req, res) => {
+    try {
+        const messages = await Message.getMessagesByRecepteur(req.params.id_recepteur);
+        messages.length > 0 ? res.status(200).json(messages) : res.status(404).json({ message: "Aucun message trouvé pour ce récepteur" });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+app.get('/message/conversation/:id_utilisateur1/:id_utilisateur2', async (req, res) => {
+    try {
+        const { id_utilisateur1, id_utilisateur2 } = req.params;
+        const messages = await Message.getConversation(id_utilisateur1, id_utilisateur2);
+        messages.length > 0
+            ? res.status(200).json(messages)
+            : res.status(404).json({ message: "Aucun message trouvé entre ces utilisateurs" });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+app.post('/message', async (req, res) => {
+    try {
+        const newMessage = await Message.createMessage(req.body);
+        res.status(201).json({ newMessage });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+app.put('/message/:id_message', async (req, res) => {
+    try {
+        const updatedMessage = await Message.updateMessage(req.params.id_message, req.body);
+        res.status(200).json({ updatedMessage });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+app.delete('/message/:id_message', async (req, res) => {
+    try {
+        await Message.deleteMessage(req.params.id_message);
         res.status(204).send();
     } catch (error) {
         res.status(500).json({ error: error.message });
