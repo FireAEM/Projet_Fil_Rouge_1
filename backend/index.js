@@ -1,5 +1,7 @@
 const express = require('express');
 const cors = require('cors');
+const session = require('express-session');
+const bcrypt = require('bcrypt');
 
 
 const Utilisateur = require('./models/utilisateur');
@@ -17,6 +19,17 @@ app.use(cors({
 }));
 
 app.use(express.json());
+
+// Configuration de la session
+app.use(session({
+    secret: process.env.SESSION_SECRET || 'default_secret_key',
+    resave: false,
+    saveUninitialized: false,
+    cookie: { 
+        secure: false, // true si vous êtes en HTTPS
+        maxAge: 60 * 60 * 1000 // 1 heure
+    }
+}));
 
 
 
@@ -45,7 +58,9 @@ app.post('/utilisateur/connexion', async (req, res) => {
         const { email, mot_de_passe } = req.body;
         const utilisateur = await Utilisateur.getUserByEmail(email);
 
-        if (utilisateur && utilisateur.mot_de_passe === mot_de_passe) {
+        if (utilisateur && await bcrypt.compare(mot_de_passe, utilisateur.mot_de_passe)) {
+            // Création de la session utilisateur
+            req.session.userId = utilisateur.id_utilisateur;
             res.status(200).json({ message: "Connexion réussie", utilisateur });
         } else {
             res.status(401).json({ message: "Email ou mot de passe incorrect" });
@@ -55,11 +70,29 @@ app.post('/utilisateur/connexion', async (req, res) => {
     }
 });
 
-// Ajouter /utilisateur/deconnexion
+app.post('/utilisateur/deconnexion', (req, res) => {
+    req.session.destroy(err => {
+        if (err) {
+            return res.status(500).json({ error: "Erreur lors de la déconnexion" });
+        }
+        res.status(200).json({ message: "Déconnexion réussie" });
+    });
+});
 
 app.post('/utilisateur', async (req, res) => {
     try {
-        const newUser = await Utilisateur.createUser(req.body);
+        const { nom, prenom, email, mot_de_passe, role } = req.body;
+        // On hash le mot de passe
+        const saltRounds = 10;
+        const hashedPassword = await bcrypt.hash(mot_de_passe, saltRounds);
+        
+        const newUser = await Utilisateur.createUser({
+            nom,
+            prenom,
+            email,
+            mot_de_passe: hashedPassword,
+            role
+        });
         res.status(201).json({ newUser });
     } catch (error) {
         res.status(500).json({ error: error.message });
@@ -68,8 +101,8 @@ app.post('/utilisateur', async (req, res) => {
 
 app.put('/utilisateur/:id_utilisateur', async (req, res) => {
     try {
-        const updateuser = await Utilisateur.updateUser(req.params.id_utilisateur, req.body);
-        res.status(200).json({ updateuser });
+        const updateUser = await Utilisateur.updateUser(req.params.id_utilisateur, req.body);
+        res.status(200).json({ updateUser });
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
