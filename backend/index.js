@@ -6,6 +6,7 @@ const bcrypt = require('bcrypt');
 
 const Utilisateur = require('./models/utilisateur');
 const Categorie = require('./models/categorie');
+const Annonce = require('./models/annonce');
 
 
 
@@ -133,7 +134,7 @@ app.get('/utilisateur/:id_utilisateur/role', async (req, res) => {
 
 
 
-//EndPoint type_etablissement
+//EndPoint categorie
 
 app.post('/categorie', async (req, res) => {
     try {
@@ -174,6 +175,73 @@ app.put('/categorie/:id_categorie', async (req, res) => {
 app.delete('/categorie/:id_categorie', async (req, res) => {
     try {
         await Categorie.deleteCategorie(req.params.id_categorie);
+        res.status(204).send();
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+
+
+//EndPoint annonce
+
+app.post('/annonce', async (req, res) => {
+    try {
+        const newAnnonce = await Annonce.createAnnonce(req.body);
+        res.status(201).json({ newAnnonce });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+app.get('/annonce', async (req, res) => {
+    try {
+        const annonces = await Annonce.getAllAnnonce();
+        res.status(200).json(annonces);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+app.get('/annonce/:id_annonce', async (req, res) => {
+    try {
+        const annonce = await Annonce.getAnnonceById(req.params.id_annonce);
+        annonce ? res.status(200).json(annonce) : res.status(404).json({ message: "Annonce non trouvée" });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+app.get('/annonce/categorie/:id_categorie', async (req, res) => {
+    try {
+        const annonces = await Annonce.getAnnonceByCategorie(req.params.id_categorie);
+        annonces.length > 0 ? res.status(200).json(annonces) : res.status(404).json({ message: "Aucune annonce trouvée pour cette catégorie" });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+app.get('/annonce/utilisateur/:id_utilisateur', async (req, res) => {
+    try {
+        const annonces = await Annonce.getAnnonceByUtilisateur(req.params.id_utilisateur);
+        annonces.length > 0 ? res.status(200).json(annonces) : res.status(404).json({ message: "Aucune annonce trouvée pour cet utilisateur" });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+app.put('/annonce/:id_annonce', async (req, res) => {
+    try {
+        const updatedAnnonce = await Annonce.updateAnnonce(req.params.id_annonce, req.body);
+        res.status(200).json({ updatedAnnonce });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+app.delete('/annonce/:id_annonce', async (req, res) => {
+    try {
+        await Annonce.deleteAnnonce(req.params.id_annonce);
         res.status(204).send();
     } catch (error) {
         res.status(500).json({ error: error.message });
