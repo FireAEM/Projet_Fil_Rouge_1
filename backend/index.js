@@ -7,6 +7,7 @@ const bcrypt = require('bcrypt');
 const Utilisateur = require('./models/utilisateur');
 const Categorie = require('./models/categorie');
 const Annonce = require('./models/annonce');
+const Favori = require('./models/favori');
 
 
 
@@ -242,6 +243,64 @@ app.put('/annonce/:id_annonce', async (req, res) => {
 app.delete('/annonce/:id_annonce', async (req, res) => {
     try {
         await Annonce.deleteAnnonce(req.params.id_annonce);
+        res.status(204).send();
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+
+
+//EndPoint favori
+
+app.get('/favori', async (req, res) => {
+    try {
+        const favoris = await Favori.getAllFavori();
+        res.status(200).json(favoris);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+app.get('/favori/:id_favori', async (req, res) => {
+    try {
+        const favori = await Favori.getFavoriById(req.params.id_favori);
+        favori ? res.status(200).json(favori) : res.status(404).json({ message: "Favori non trouvé" });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+app.get('/favori/utilisateur/:id_utilisateur', async (req, res) => {
+    try {
+        const favoris = await Favori.getFavoriByUtilisateur(req.params.id_utilisateur);
+        favoris.length > 0 ? res.status(200).json(favoris) : res.status(404).json({ message: "Aucun favori trouvé pour cet utilisateur" });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+app.post('/favori', async (req, res) => {
+    try {
+        const newFavori = await Favori.createFavori(req.body);
+        res.status(201).json({ newFavori });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+app.put('/favori/:id_favori', async (req, res) => {
+    try {
+        const updatedFavori = await Favori.updateFavori(req.params.id_favori, req.body);
+        res.status(200).json({ updatedFavori });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+app.delete('/favori/:id_favori', async (req, res) => {
+    try {
+        await Favori.deleteFavori(req.params.id_favori);
         res.status(204).send();
     } catch (error) {
         res.status(500).json({ error: error.message });
