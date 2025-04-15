@@ -1,0 +1,77 @@
+.header {
+    position: sticky;
+    top: 10px;
+    width: 75vw;
+    height: auto;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    margin: auto;
+    align-items: center;
+    padding: 10px 25px;
+    background-color: var(--header-background);
+    border: 1px solid var(--border-color2);
+    border-radius: 50px;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    z-index: 100;
+    transition: 0.25s;
+}
+
+.headerLogo {
+    width: 50px;
+    height: auto;
+}
+
+.headerSearch {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 5px;
+    background-color: var(--background-color2);
+    border: 1px solid var(--border-color2);
+    border-radius: 25px;
+    gap: 10px;
+}
+.headerSearch input {
+    padding: 10px;
+    border: none;
+    border-radius: 50px;
+    background-color: transparent;
+    color: var(--text-color);
+}
+.headerSearchIcon {
+    width: 20px;
+    height: auto;
+    margin: 5px;
+}
+
+.headerNav {
+    margin: 0;
+    padding: 0;
+    display: flex;
+    gap: 20px;
+}
+
+.headerNav a {
+    color: var(--text-color);
+    font-weight: 500;
+    text-decoration: none;
+    transition: 0.25s;
+}
+.headerNav a:hover {
+    text-decoration: underline;
+    text-underline-offset: 5px;
+}
+
+.headerLogo:active {
+    transform: scale(0.95);
+    transition: 0.25s;
+}
+
+.headerContainer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+}

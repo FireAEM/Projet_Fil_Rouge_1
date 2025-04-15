@@ -1,0 +1,19 @@
+.linkButton {
+    padding: 10px;
+    border: 1px solid var(--border-color2);
+    border-radius: 50px;
+    text-decoration: none;
+    cursor: pointer;
+    transition: 0.25s;
+}
+
+.linkButton:hover {
+    background-color: var(--accent-color1) !important;
+    color: var(--text-color) !important;
+}
+
+.linkButton:active {
+    background-color: var(--accent-color2) !important;
+    color: var(--text-color) !important;
+    transform: scale(0.95);
+}
