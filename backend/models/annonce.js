@@ -30,6 +30,28 @@ class Annonce {
         return result.rows;
     }
 
+    static async getAnnonceCategorie(id_annonce) {
+        const result = await pool.query(
+            `SELECT categorie.*
+                FROM annonce
+                JOIN categorie ON annonce.id_categorie = categorie.id_categorie
+                WHERE annonce.id_annonce = $1`,
+            [id_annonce]
+        );
+        return result.rows[0];
+    }
+
+    static async getAnnonceUtilisateur(id_annonce) {
+        const result = await pool.query(
+            `SELECT utilisateur.*
+                FROM annonce
+                JOIN utilisateur ON annonce.id_utilisateur = utilisateur.id_utilisateur
+                WHERE annonce.id_annonce = $1`,
+            [id_annonce]
+        );
+        return result.rows[0];
+    }
+
     static async createAnnonce({ titre, description, prix, localisation, image_annonce, date_creation, id_categorie, id_utilisateur }) {
         const result = await pool.query(
             'INSERT INTO annonce (titre, description, prix, localisation, image_annonce, date_creation, id_categorie, id_utilisateur) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *',

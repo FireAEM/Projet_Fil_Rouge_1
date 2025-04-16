@@ -17,7 +17,7 @@ require('dotenv').config();
 const app = express();
 
 app.use(cors({
-    origin: 'http://localhost:3001',
+    origin: 'http://localhost:3005',
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     credentials: true,
 }));
@@ -29,7 +29,7 @@ app.use(session({
     secret: process.env.SESSION_SECRET || 'default_secret_key',
     resave: false,
     saveUninitialized: false,
-    cookie: { 
+    cookie: {
         secure: false, // true si vous êtes en HTTPS
         maxAge: 60 * 60 * 1000 // 1 heure
     }
@@ -89,7 +89,7 @@ app.post('/utilisateur', async (req, res) => {
         // On hash le mot de passe
         const saltRounds = 10;
         const hashedPassword = await bcrypt.hash(mot_de_passe, saltRounds);
-        
+
         const newUser = await Utilisateur.createUser({
             nom,
             prenom,
@@ -232,6 +232,32 @@ app.get('/annonce/utilisateur/:id_utilisateur', async (req, res) => {
     }
 });
 
+app.get('/annonce/:id_annonce/categorie', async (req, res) => {
+    try {
+        const category = await Annonce.getAnnonceCategorie(req.params.id_annonce);
+        if (category) {
+            res.status(200).json(category);
+        } else {
+            res.status(404).json({ message: "Catégorie non trouvée pour l'annonce" });
+        }
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+app.get('/annonce/:id_annonce/utilisateur', async (req, res) => {
+    try {
+        const user = await Annonce.getAnnonceUtilisateur(req.params.id_annonce);
+        if (user) {
+            res.status(200).json(user);
+        } else {
+            res.status(404).json({ message: "Utilisateur non trouvé pour l'annonce" });
+        }
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
 app.put('/annonce/:id_annonce', async (req, res) => {
     try {
         const updatedAnnonce = await Annonce.updateAnnonce(req.params.id_annonce, req.body);
@@ -310,7 +336,7 @@ app.delete('/favori/:id_favori', async (req, res) => {
 
 
 
-//EndPoint favori
+//EndPoint message
 
 app.get('/message', async (req, res) => {
     try {

@@ -25,52 +25,59 @@ const Header: React.FC = () => {
 
     return (
         <header className={styles.header}>
-        <Link href="/">
-            <Image
-            src="/images/logo.png"
-            alt="Square Logo"
-            className={styles.headerLogo}
-            width={50}
-            height={50}
-            priority
-            />
-        </Link>
+            <Link href="/">
+                <Image
+                    src="/images/logo.png"
+                    alt="Square Logo"
+                    className={styles.headerLogo}
+                    width={50}
+                    height={50}
+                    priority
+                />
+            </Link>
 
-        <nav className={styles.headerNav}>
-            <Link href="/">Acceuil</Link>
-            <Link href="/annonces">Annonces</Link>
-        </nav>
+            <nav className={styles.headerNav}>
+                <Link href="/">Acceuil</Link>
+                <Link href="/annonces">Annonces</Link>
+            </nav>
 
-        <div className={styles.headerSearch}>
-            <form onSubmit={handleSearchSubmit} className={styles.headerSearchForm}>
-            <input
-                type="text"
-                placeholder="Recherche..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-            />
-            </form>
-            <Image
-                src="/images/recherche.png"
-                alt="Recherche"
-                className={styles.headerSearchIcon}
-                width={25}
-                height={25}
-                priority
-            />
-        </div>
-
-        <div className={styles.headerContainer}>
-            <LinkButton link="/favoris" className="headerFavoris" text="❤️ Favoris" />
-            <LinkButton link="/messages" className="headerMessages" text="✉️ Messages" />
-            <LinkButton
-            link="/login"
-            className="headerAccount"
-            text="Compte"
-            color="white"
-            backgroundColor="black"
-            />
-        </div>
+            <div className={styles.headerContainer}>
+                <div className={styles.headerSearch}>
+                    <form onSubmit={handleSearchSubmit} className={styles.headerSearchForm}>
+                    <input
+                        type="text"
+                        placeholder="Recherche..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                    />
+                    </form>
+                    <Image
+                        src="/images/recherche.png"
+                        alt="Recherche"
+                        className={styles.headerSearchIcon}
+                        width={25}
+                        height={25}
+                        priority
+                    />
+                </div>
+                <LinkButton 
+                    link="/favoris" 
+                    className="headerFavoris" 
+                    text="❤️ Favoris" 
+                />
+                <LinkButton 
+                    link="/messages" 
+                    className="headerMessages" 
+                    text="✉️ Messages" 
+                />
+                <LinkButton
+                    link="/login"
+                    className="headerAccount"
+                    text="🧑 Compte"
+                    color="white"
+                    backgroundColor="black"
+                />
+            </div>
         </header>
     );
 };

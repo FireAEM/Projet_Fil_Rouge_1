@@ -6,6 +6,7 @@
     background-color: var(--footer-background);
     color: #fff;
     gap: 25px;
+    margin-top: 250px;
 }
 
 .footerLogo {

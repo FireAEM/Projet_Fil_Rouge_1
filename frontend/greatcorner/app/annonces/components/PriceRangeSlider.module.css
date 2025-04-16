@@ -1,0 +1,18 @@
+.sliderContainer {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+.label {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+    font-weight: 300;
+}
+.input {
+    padding: 10px;
+    border: 1px solid var(--border-color1);
+    border-radius: 10px;
+}

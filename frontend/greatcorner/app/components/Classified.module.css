@@ -1,0 +1,57 @@
+.classified {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+    align-content: center;
+    justify-content: space-between;
+    align-items: center;
+    background-color: rgba(255, 255, 255, 0.75);
+    border: 1px solid var(--border-color1);
+    padding: 20px;
+    width: 250px;
+    text-align: center;
+    border-radius: 20px;
+    transition: 0.25s;
+    gap: 10px;
+}
+.classified:hover {
+    cursor: pointer;
+    transform: scale(1.05);
+}
+
+.classifiedLink {
+    color: var(--text-color);
+    text-decoration: none;
+}
+
+.classifiedImage {
+    width: auto;
+    height: auto;
+}
+
+.skeleton {
+    width: 250px;
+    height: 250px;
+    background: linear-gradient(90deg, rgba(255, 255, 255, 0.25) 25%, rgba(255, 255, 255, 0.5) 50%, rgba(255, 255, 255, 0.25) 75%);
+    background-size: 300% 300%;
+    animation: shimmer 1.5s infinite linear;
+    border-radius: 20px;
+}
+
+@keyframes shimmer {
+    0% { background-position: 100% 0%; }
+    100% { background-position: -100% 0%; }
+}
+
+.classifiedCategoryLocation {
+    font-weight: 300;
+}
+
+.classifiedPrice {
+    font-weight: 500;
+}
+
+.classifiedNameDate {
+    font-size: small;
+    font-weight: 300;
+}

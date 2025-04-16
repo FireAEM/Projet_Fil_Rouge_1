@@ -1,0 +1,5 @@
+.select {
+    padding: 10px;
+    border: 1px solid var(--border-color1);
+    border-radius: 10px;
+}
