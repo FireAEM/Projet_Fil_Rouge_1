@@ -1,22 +1,32 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useContext, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Form, { FormProps } from "@/app/components/Form";
 import styles from "./page.module.css";
 import Link from "next/link";
+import { AuthContext } from "@/app/context/AuthContext"; // Chemin à adapter selon votre projet
 
 const InscriptionPage = () => {
+    const { user } = useContext(AuthContext);
+    const router = useRouter();
+
+    // Si déjà connecté, rediriger immédiatement vers /dashboard
+    useEffect(() => {
+        if (user) {
+        router.push("/dashboard");
+        }
+    }, [user, router]);
+
     const [formData, setFormData] = useState({
         nom: "",
         prenom: "",
         email: "",
         mot_de_passe: "",
-        role: "client",
+        role: "client", // Rôle par défaut
     });
     const [errorMessage, setErrorMessage] = useState("");
     const [successMessage, setSuccessMessage] = useState("");
-    const router = useRouter();
 
     const handleChange = (
         event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -28,28 +38,23 @@ const InscriptionPage = () => {
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         // Vérifier que tous les champs obligatoires sont remplis
-        if (
-            !formData.nom ||
-            !formData.prenom ||
-            !formData.email ||
-            !formData.mot_de_passe
-        ) {
-            setErrorMessage("Tous les champs doivent être remplis.");
-            return;
+        if (!formData.nom || !formData.prenom || !formData.email || !formData.mot_de_passe) {
+        setErrorMessage("Tous les champs doivent être remplis.");
+        return;
         }
         setErrorMessage("");
 
         try {
             const res = await fetch("http://localhost:3000/utilisateur", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    credentials: "include", // Permet la gestion de session
-                    body: JSON.stringify({
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                credentials: "include", // Permet la gestion de session
+                body: JSON.stringify({
                     nom: formData.nom,
                     prenom: formData.prenom,
                     email: formData.email,
                     mot_de_passe: formData.mot_de_passe,
-                    role: formData.role, // Défini par défaut à "client"
+                    role: formData.role, // Déjà défini à "client"
                 }),
             });
             if (!res.ok) {
@@ -58,7 +63,7 @@ const InscriptionPage = () => {
             }
             const data = await res.json();
             setSuccessMessage("Inscription réussie !");
-            // Connexion automatique : rediriger l'utilisateur (la session est gérée par le backend)
+            // Une fois l'inscription réussie, la session est créée côté backend.
             router.push("/dashboard");
         } catch (err: any) {
             setErrorMessage(err.message);
@@ -103,7 +108,7 @@ const InscriptionPage = () => {
         buttons: [
             {
                 textContent: "S'inscrire",
-                type: "submit", // Cette valeur est désormais correctement typée
+                type: "submit", // Déclarez la valeur en tant que littérale
                 class: "submitButton",
                 color: "white",
                 backgroundColor: "black",

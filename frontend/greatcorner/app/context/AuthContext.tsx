@@ -1,38 +1,59 @@
-import { createContext, useState, useEffect, ReactNode } from 'react';
+"use client";
 
-interface User {
-    username: string;
-}
+import React, { createContext, useState, useEffect, ReactNode } from "react";
 
+// Définition d'une interface pour le contexte d'authentification
 interface AuthContextType {
-    user: User | null;
-    login: (userData: User) => void;
-    logout: () => void;
+  user: any;
+  login: (userData: any) => void;
+  logout: () => void;
 }
 
-export const AuthContext = createContext<AuthContextType | undefined>(undefined);
+// Valeurs par défaut pour le contexte
+const defaultAuthContext: AuthContextType = {
+  user: null,
+  login: () => {},
+  logout: () => {},
+};
 
-export const AuthProvider = ({ children }: { children: ReactNode }) => {
-    const [user, setUser] = useState<User | null>(null);
+export const AuthContext = createContext<AuthContextType>(defaultAuthContext);
 
-    useEffect(() => {
-        const storedUser = JSON.parse(localStorage.getItem('user') || 'null');
-        if (storedUser) setUser(storedUser);
-    }, []);
+interface AuthProviderProps {
+  children: ReactNode;
+}
 
-    const login = (userData: User) => {
-        localStorage.setItem('user', JSON.stringify(userData));
-        setUser(userData);
-    };
+export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
+  const [user, setUser] = useState<any>(null);
 
-    const logout = () => {
-        localStorage.removeItem('user');
-        setUser(null);
-    };
+  // Charger l'utilisateur depuis le localStorage lors du montage du composant
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const storedUser = localStorage.getItem("user");
+      if (storedUser) {
+        try {
+          setUser(JSON.parse(storedUser));
+        } catch (error) {
+          console.error("Erreur lors du parsing de l'utilisateur stocké :", error);
+        }
+      }
+    }
+  }, []);
 
-    return (
-        <AuthContext.Provider value={{ user, login, logout }}>
-            {children}
-        </AuthContext.Provider>
-    );
+  // Fonction pour connecter l'utilisateur
+  const login = (userData: any) => {
+    localStorage.setItem("user", JSON.stringify(userData));
+    setUser(userData);
+  };
+
+  // Fonction pour déconnecter l'utilisateur
+  const logout = () => {
+    localStorage.removeItem("user");
+    setUser(null);
+  };
+
+  return (
+    <AuthContext.Provider value={{ user, login, logout }}>
+      {children}
+    </AuthContext.Provider>
+  );
 };

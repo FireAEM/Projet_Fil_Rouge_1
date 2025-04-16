@@ -1,18 +1,28 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useContext, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Form, { FormProps } from "@/app/components/Form";
 import styles from "./page.module.css";
 import Link from "next/link";
+import { AuthContext } from "@/app/context/AuthContext";
 
 const ConnexionPage = () => {
+  const { user, login } = useContext(AuthContext);
+  const router = useRouter();
+
+  // Si déjà connecté, rediriger immédiatement vers /dashboard
+  useEffect(() => {
+    if (user) {
+      router.push("/dashboard");
+    }
+  }, [user, router]);
+
   const [formData, setFormData] = useState({
     email: "",
     mot_de_passe: "",
   });
   const [errorMessage, setErrorMessage] = useState("");
-  const router = useRouter();
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -44,6 +54,8 @@ const ConnexionPage = () => {
         throw new Error(errorData.message || "Erreur de connexion");
       }
       const data = await response.json();
+      // Mettre à jour le contexte d'authentification si nécessaire
+      login(data.utilisateur);
       router.push("/dashboard");
     } catch (error: any) {
       setErrorMessage(error.message);
