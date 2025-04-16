@@ -3,6 +3,7 @@
     border: 1px solid var(--border-color2);
     border-radius: 50px;
     text-decoration: none;
+    text-align: center;
     cursor: pointer;
     transition: 0.25s;
 }

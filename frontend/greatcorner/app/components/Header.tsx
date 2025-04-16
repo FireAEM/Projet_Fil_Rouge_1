@@ -71,7 +71,7 @@ const Header: React.FC = () => {
                     text="✉️ Messages" 
                 />
                 <LinkButton
-                    link="/login"
+                    link="/connexion"
                     className="headerAccount"
                     text="🧑 Compte"
                     color="white"

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import React from "react";
-import styles from './LinkButton.module.css';
+import styles from "./LinkButton.module.css";
 
 type LinkButtonProps = {
     link?: string;
@@ -10,32 +10,40 @@ type LinkButtonProps = {
     color?: string;
     backgroundColor?: string;
     onClick?: () => void;
+    buttonType?: "button" | "submit" | "reset";
 };
 
 const LinkButton: React.FC<LinkButtonProps> = ({
-    link = "#",
+    link,
     text = "Bouton",
     target = "_self",
     className = "",
     color = "var(--text-color)",
     backgroundColor = "var(--background-color2)",
     onClick,
+    buttonType = "button",
 }) => {
     const style = {
-        color: color,
-        backgroundColor: backgroundColor,
+        color,
+        backgroundColor,
     };
 
-    return onClick ? (
-        <button
-            type="button"
-            onClick={onClick}
-            className={`${styles.linkButton} ${className}`}
-            style={style}
-        >
-            {text}
-        </button>
-    ) : (
+    const isButton = Boolean(onClick) || !link || link === "#";
+
+    if (isButton) {
+        return (
+            <button
+                type={buttonType}
+                onClick={onClick}
+                className={`${styles.linkButton} ${className}`}
+                style={style}
+            >
+                {text}
+            </button>
+        );
+    }
+
+    return (
         <Link
             href={link}
             target={target}
