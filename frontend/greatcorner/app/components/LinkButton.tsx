@@ -9,6 +9,7 @@ type LinkButtonProps = {
     className?: string;
     color?: string;
     backgroundColor?: string;
+    onClick?: () => void;
 };
 
 const LinkButton: React.FC<LinkButtonProps> = ({
@@ -18,13 +19,23 @@ const LinkButton: React.FC<LinkButtonProps> = ({
     className = "",
     color = "var(--text-color)",
     backgroundColor = "var(--background-color2)",
+    onClick,
 }) => {
     const style = {
         color: color,
         backgroundColor: backgroundColor,
     };
 
-    return (
+    return onClick ? (
+        <button
+            type="button"
+            onClick={onClick}
+            className={`${styles.linkButton} ${className}`}
+            style={style}
+        >
+            {text}
+        </button>
+    ) : (
         <Link
             href={link}
             target={target}
@@ -33,7 +44,7 @@ const LinkButton: React.FC<LinkButtonProps> = ({
         >
             {text}
         </Link>
-      );      
+    );
 };
 
 export default LinkButton;

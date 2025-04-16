@@ -35,7 +35,7 @@ const Classified: React.FC<ClassifiedProps> = ({
     });
 
     return (
-        <Link href={`/annonce/${id}`} className={styles.classifiedLink}>
+        <Link href={`/annonces/annonce/${id}`} className={styles.classifiedLink}>
             <div className={styles.classified}>
                 <div className={loading ? styles.skeleton : ""}>
                     <Image 

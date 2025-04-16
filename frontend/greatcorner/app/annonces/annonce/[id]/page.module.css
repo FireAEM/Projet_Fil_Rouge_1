@@ -1,0 +1,21 @@
+.annonce {
+    display: flex;
+    padding: 50px;
+    gap: 50px;
+}
+
+.annonceImageContainer, .annonceInformationsContainer {
+    flex: 1;
+}
+
+.annonceImageContainer img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 20px;
+}
+
+.annonceInformationsContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+}

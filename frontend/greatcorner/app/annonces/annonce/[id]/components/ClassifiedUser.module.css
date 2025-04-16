@@ -1,0 +1,31 @@
+.classifiedUser {
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    border: 1px solid var(--border-color1);
+    border-radius: 20px;
+    background-color: rgba(255, 255, 255, 0.75);
+    gap: 20px;
+}
+
+.classifiedUser > a {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    color: var(--text-color);
+    text-decoration: none;
+}
+
+.classifiedUserImage {
+    width: 25px;
+    height: 25px;
+}
+.classifiedUserImageBackground {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 50px;
+    height: 50px;
+    background-color: rgb(245, 245, 245);
+    border-radius: 50px;
+}

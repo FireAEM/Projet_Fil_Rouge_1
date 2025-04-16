@@ -1,0 +1,21 @@
+.classifiedInformations {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+    align-content: flex-start;
+    justify-content: space-between;
+    align-items: flex-start;
+    background-color: rgba(255, 255, 255, 0.75);
+    border: 1px solid var(--border-color1);
+    padding: 20px;
+    border-radius: 20px;
+    gap: 25px;
+}
+
+.classifiedInformationsCategoryLocation, .classifiedInformationsDescription {
+    font-weight: 300;
+}
+
+.classifiedInformationsPrice {
+    font-weight: 500;
+}
