@@ -105,7 +105,16 @@ app.post('/utilisateur', async (req, res) => {
 
 app.put('/utilisateur/:id_utilisateur', async (req, res) => {
     try {
-        const updateUser = await Utilisateur.updateUser(req.params.id_utilisateur, req.body);
+        let { mot_de_passe, ...updateFields } = req.body;
+
+        // Si un mot de passe est fourni, on le hash
+        if (mot_de_passe) {
+            const saltRounds = 10;
+            mot_de_passe = await bcrypt.hash(mot_de_passe, saltRounds);
+            updateFields.mot_de_passe = mot_de_passe;
+        }
+
+        const updateUser = await Utilisateur.updateUser(req.params.id_utilisateur, updateFields);
         res.status(200).json({ updateUser });
     } catch (error) {
         res.status(500).json({ error: error.message });

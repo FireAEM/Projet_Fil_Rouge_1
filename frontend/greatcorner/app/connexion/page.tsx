@@ -14,7 +14,7 @@ const ConnexionPage = () => {
   // Si déjà connecté, rediriger immédiatement vers /dashboard
   useEffect(() => {
     if (user) {
-      router.push("/dashboard");
+      router.push("/dashboard/user");
     }
   }, [user, router]);
 
@@ -56,7 +56,7 @@ const ConnexionPage = () => {
       const data = await response.json();
       // Mettre à jour le contexte d'authentification si nécessaire
       login(data.utilisateur);
-      router.push("/dashboard");
+      router.push("/dashboard/user");
     } catch (error: any) {
       setErrorMessage(error.message);
     }

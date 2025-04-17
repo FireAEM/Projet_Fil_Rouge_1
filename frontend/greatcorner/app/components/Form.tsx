@@ -2,6 +2,7 @@ import React from "react";
 import InputField from "@/app/components/InputField";
 import LinkButton from "@/app/components/LinkButton";
 import Select from "@/app/components/Select";
+import TextArea from "@/app/components/TextArea";
 import styles from "./Form.module.css";
 
 export type Field = {
@@ -11,7 +12,9 @@ export type Field = {
     required?: boolean;
     value?: string;
     onChange?: (
-        event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+        event: React.ChangeEvent<
+            HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+        >
     ) => void;
     component?: string;
     options?: { id: string; nom: string }[];
@@ -40,7 +43,7 @@ const Form: React.FC<FormProps> = ({ data, onSubmit }) => {
         <form className={styles.form} onSubmit={onSubmit}>
             {data.fields.map((field, index) => {
                 if (field.component === "select" && field.options) {
-                    const selectOptions = field.options.map((opt) => ({
+                    const selectOptions = field.options.map(opt => ({
                         value: opt.id,
                         label: opt.nom,
                     }));
@@ -48,15 +51,9 @@ const Form: React.FC<FormProps> = ({ data, onSubmit }) => {
                         <Select
                             key={index}
                             value={field.value || ""}
-                            onChange={(val) => {
+                            onChange={val => {
                                 if (field.onChange) {
-                                // Création d'un événement synthétique pour respecter l'interface
-                                const event = {
-                                    target: {
-                                    name: field.id,
-                                    value: val,
-                                    },
-                                } as React.ChangeEvent<HTMLSelectElement>;
+                                const event = { target: { name: field.id, value: val } } as React.ChangeEvent<HTMLSelectElement>;
                                 field.onChange(event);
                                 }
                             }}
@@ -64,6 +61,18 @@ const Form: React.FC<FormProps> = ({ data, onSubmit }) => {
                         />
                     );
                 }
+                if (field.component === "textarea") {
+                return (
+                    <TextArea
+                        key={index}
+                        name={field.id}
+                        value={field.value || ""}
+                        onChange={field.onChange as React.ChangeEventHandler<HTMLTextAreaElement>}
+                        required={field.required}
+                    />
+                );
+                }
+                // Default to input field (including file inputs)
                 return (
                     <InputField
                         key={index}
@@ -72,7 +81,7 @@ const Form: React.FC<FormProps> = ({ data, onSubmit }) => {
                         name={field.id}
                         required={field.required}
                         value={field.value || ""}
-                        onChange={field.onChange}
+                        onChange={field.onChange as React.ChangeEventHandler<HTMLInputElement>}
                     />
                 );
             })}

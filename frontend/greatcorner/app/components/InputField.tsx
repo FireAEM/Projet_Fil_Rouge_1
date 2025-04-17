@@ -1,5 +1,5 @@
 import React from "react";
-import styles from './InputField.module.css';
+import styles from "./InputField.module.css";
 
 type InputFieldProps = {
     label?: string;
@@ -15,22 +15,29 @@ const InputField: React.FC<InputFieldProps> = ({
     type = "text",
     name = "",
     required = false,
-    value = "",
-    onChange
+    value,
+    onChange,
 }) => {
+    // Construire l'objet props à appliquer à l'input
+    const inputProps: React.InputHTMLAttributes<HTMLInputElement> = {
+        id: name,
+        type,
+        name,
+        placeholder: label,
+        required,
+        onChange,
+        className: styles.inputField,
+    };
+
+    // Si le type n'est pas "file", on ajoute la prop value
+    if (type !== "file") {
+        inputProps.value = value ?? "";
+    }
+
     return (
         <div className={styles.inputField}>
             <label htmlFor={name}>{label}</label>
-            <input
-                id={name}
-                type={type}
-                name={name}
-                placeholder={label}
-                required={required}
-                value={value}
-                onChange={onChange}
-                className={styles.inputField}
-            />
+            <input {...inputProps} />
         </div>
     );
 };

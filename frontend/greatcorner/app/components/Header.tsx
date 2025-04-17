@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
@@ -8,9 +8,18 @@ import LinkButton from "@/app/components/LinkButton";
 import styles from "./Header.module.css";
 
 const Header: React.FC = () => {
+    const [isMounted, setIsMounted] = useState(false);
     const [searchQuery, setSearchQuery] = useState("");
     const router = useRouter();
     const pathname = usePathname();
+
+    useEffect(() => {
+        setIsMounted(true);
+    }, []);
+
+    if (!isMounted) {
+        return null;
+    }
 
     const handleSearchSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -44,12 +53,12 @@ const Header: React.FC = () => {
             <div className={styles.headerContainer}>
                 <div className={styles.headerSearch}>
                     <form onSubmit={handleSearchSubmit} className={styles.headerSearchForm}>
-                    <input
-                        type="text"
-                        placeholder="Recherche..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                    />
+                        <input
+                            type="text"
+                            placeholder="Recherche..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                        />
                     </form>
                     <Image
                         src="/images/recherche.png"

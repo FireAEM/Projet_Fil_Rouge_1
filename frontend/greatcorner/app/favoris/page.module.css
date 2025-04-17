@@ -1,0 +1,15 @@
+.favorisSection {
+    display: flex;
+    flex-direction: column;
+    padding: 50px;
+    gap: 25px;
+    align-items: center;
+}
+
+.favorisListContainer {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: left;
+    margin: auto;
+    gap: 25px;
+}

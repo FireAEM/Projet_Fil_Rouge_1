@@ -14,7 +14,7 @@ const InscriptionPage = () => {
     // Si déjà connecté, rediriger immédiatement vers /dashboard
     useEffect(() => {
         if (user) {
-        router.push("/dashboard");
+        router.push("/dashboard/user");
         }
     }, [user, router]);
 
@@ -64,7 +64,7 @@ const InscriptionPage = () => {
             const data = await res.json();
             setSuccessMessage("Inscription réussie !");
             // Une fois l'inscription réussie, la session est créée côté backend.
-            router.push("/dashboard");
+            router.push("/dashboard/user");
         } catch (err: any) {
             setErrorMessage(err.message);
         }
