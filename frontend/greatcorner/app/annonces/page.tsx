@@ -15,7 +15,7 @@ export default function Annonces() {
   // États pour les filtres
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
-  const [priceRange, setPriceRange] = useState<[number, number]>([0, 1000]); // Exemple de plage par défaut
+  const [priceRange, setPriceRange] = useState<[number, number]>([0, 1000]);
   const [sortOption, setSortOption] = useState("default");
 
   const searchParams = useSearchParams();

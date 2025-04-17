@@ -10,24 +10,30 @@ export default function FavorisPage() {
   const { user } = useContext(AuthContext);
   const router = useRouter();
   const [favoriteAnnonces, setFavoriteAnnonces] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
   // Si l'utilisateur n'est pas connecté, rediriger vers /connexion
   useEffect(() => {
+    if (loading) return;
     if (!user) {
       router.push("/connexion");
     }
-  }, [user, router]);
+  }, [user, loading, router]);
 
   // Récupérer les favoris de l'utilisateur et les annonces associées
   useEffect(() => {
     const fetchFavorites = async () => {
       if (user) {
         try {
-          const res = await fetch(`http://localhost:3000/favori/utilisateur/${user.id_utilisateur}`, {
-            credentials: "include",
-          });
+          const res = await fetch(
+            `http://localhost:3000/favori/utilisateur/${user.id_utilisateur}`,
+            { credentials: "include" }
+          );
           if (!res.ok) {
-            console.error("Erreur lors de la récupération des favoris :", res.statusText);
+            console.error(
+              "Erreur lors de la récupération des favoris :",
+              res.statusText
+            );
             return;
           }
           const favoris = await res.json();
@@ -35,9 +41,10 @@ export default function FavorisPage() {
           // Pour chaque favori, récupérer les détails de l'annonce
           const annonces = await Promise.all(
             favoris.map(async (fav: { id_annonce: number }) => {
-              const resAnnonce = await fetch(`http://localhost:3000/annonce/${fav.id_annonce}`, {
-                credentials: "include",
-              });
+              const resAnnonce = await fetch(
+                `http://localhost:3000/annonce/${fav.id_annonce}`,
+                { credentials: "include" }
+              );
               if (resAnnonce.ok) {
                 const annonce = await resAnnonce.json();
                 return annonce;
@@ -50,12 +57,18 @@ export default function FavorisPage() {
           setFavoriteAnnonces(annonces.filter((a) => a));
         } catch (error) {
           console.error("Erreur lors du fetch des favoris :", error);
+        } finally {
+          setLoading(false);
         }
+      } else {
+        setLoading(false);
       }
     };
 
     fetchFavorites();
   }, [user]);
+
+  if (loading) return <p className={styles.loading}>Chargement...</p>;
 
   return (
     <div className={styles.favorisSection}>

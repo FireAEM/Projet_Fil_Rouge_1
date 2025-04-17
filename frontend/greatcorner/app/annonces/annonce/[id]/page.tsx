@@ -14,132 +14,104 @@ export default function Annonce() {
     const router = useRouter();
     const { user } = useContext(AuthContext);
 
-    // Contiendra les données de l'annonce
     const [annonce, setAnnonce] = useState<any>(null);
-    // Pour suivre si l'annonce est favorite, nous stockons l'id_du favori (s'il existe) sinon null
     const [favoriteId, setFavoriteId] = useState<number | null>(null);
 
-    // Récupération de l'annonce et compléments (catégorie, utilisateur)
+    // Fetch de l'annonce + catégorie + auteur
     useEffect(() => {
-        const fetchAnnonce = async () => {
-            try {
-                const res = await fetch(`http://localhost:3000/annonce/${id}`);
-                if (res.ok) {
-                    const data = await res.json();
-
-                    // Récupérer la catégorie
-                    const resCat = await fetch(
-                        `http://localhost:3000/categorie/${data.id_categorie}`
-                    );
-                    const categoryData = resCat.ok ? await resCat.json() : null;
-
-                    // Récupérer les informations de l'utilisateur
-                    const resUser = await fetch(
-                        `http://localhost:3000/utilisateur/${data.id_utilisateur}`
-                    );
-                    const userData = resUser.ok ? await resUser.json() : null;
-
-                    setAnnonce({
-                        ...data,
-                        categorie: categoryData ? categoryData.nom : "Catégorie inconnue",
-                        utilisateur:
-                        userData || { id_utilisateur: 0, prenom: "Prénom", nom: "Nom" },
-                    });
-                } else {
-                    console.error("Erreur lors de la récupération de l'annonce");
-                }
-            } catch (error) {
-                console.error("Erreur lors du fetch de l'annonce :", error);
-            }
-        };
-
-        if (id) {
-            fetchAnnonce();
-        }
+        if (!id) return;
+        (async () => {
+            const res = await fetch(`http://localhost:3000/annonce/${id}`);
+            if (!res.ok) return console.error("Annonce non trouvée");
+            const data = await res.json();
+            const [catRes, userRes] = await Promise.all([
+                fetch(`http://localhost:3000/categorie/${data.id_categorie}`),
+                fetch(`http://localhost:3000/utilisateur/${data.id_utilisateur}`)
+            ]);
+            const cat = catRes.ok ? await catRes.json() : null;
+            const usr = userRes.ok ? await userRes.json() : null;
+            setAnnonce({
+                ...data,
+                categorie: cat?.nom ?? "Catégorie inconnue",
+                utilisateur: usr ?? { id_utilisateur: 0, prenom: "Prénom", nom: "Nom" },
+            });
+        })();
     }, [id]);
 
-    // Récupération des favoris de l'utilisateur et vérification si l'annonce est déjà favorite
+    // Fetch des favoris pour voir si déjà en favori
     useEffect(() => {
-        const fetchFavorites = async () => {
-        if (user && id) {
-            try {
-                const res = await fetch(
-                    `http://localhost:3000/favori/utilisateur/${user.id_utilisateur}`
-                );
-                if (res.ok) {
-                    const data = await res.json(); // On attend un tableau de favoris
-                    if (Array.isArray(data) && data.length > 0) {
-                        const fav = data.find(
-                            (f: any) => String(f.id_annonce) === id
-                        );
-                        setFavoriteId(fav ? fav.id_favori : null);
-                    } else {
-                        setFavoriteId(null);
-                    }
-                } else if (res.status === 404) {
-                    // Aucun favori trouvé pour cet utilisateur
-                    setFavoriteId(null);
-                }
-            } catch (error) {
-                console.error("Erreur lors du fetch des favoris :", error);
-            }
-        }
-        };
-
-        fetchFavorites();
+        if (!user || !id) return;
+        (async () => {
+            const res = await fetch(
+                `http://localhost:3000/favori/utilisateur/${user.id_utilisateur}`
+            );
+            if (!res.ok) return setFavoriteId(null);
+            const favs = await res.json();
+            const f = favs.find((f: any) => String(f.id_annonce) === id);
+            setFavoriteId(f?.id_favori ?? null);
+        })();
     }, [user, id]);
 
-    // Gestion du clic sur le bouton favori
-    const handleFavoriteClick = async () => {
+    // Contact callback
+    const handleContactClick = async () => {
         if (!user) {
             router.push("/connexion");
             return;
         }
+        if (!annonce) return;
+            const ok = window.confirm(
+            "Envoyer un message au vendeur ?"
+        );
+        if (!ok) return;
 
-        if (favoriteId) {
-            // L'annonce est déjà dans les favoris : nous effectuons une suppression
-            try {
-                    const res = await fetch(`http://localhost:3000/favori/${favoriteId}`, {
-                        method: "DELETE",
-                        credentials: "include",
-                    });
-                    if (res.ok) {
-                        setFavoriteId(null);
-                    } else {
-                        console.error("Erreur lors de la suppression du favori");
-                    }
-                } catch (error) {
-                    console.error("Erreur lors de la suppression du favori :", error);
-                }
-            } else {
-            // L'annonce n'est pas encore favorite : on l'ajoute aux favoris
-            try {
-                const res = await fetch("http://localhost:3000/favori", {
+        const contenu = 
+        `Bonjour, je suis intéressé par votre annonce "${annonce.titre}" à ${parseFloat(annonce.prix).toFixed(2)} €.` +
+        " Est-elle encore disponible ?";
+
+        try {
+            const res = await fetch("http://localhost:3000/message", {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
+                headers: { "Content-Type": "application/json" },
+                credentials: "include",
+                body: JSON.stringify({
+                    contenu,
+                    date_envoi: new Date().toISOString(),
+                    id_expediteur: user.id_utilisateur,
+                    id_recepteur: annonce.utilisateur.id_utilisateur,
+                }),
+            });
+            if (!res.ok) throw new Error("Erreur envoi message");
+            alert("Message envoyé !");
+        } catch (err:any) {
+            console.error(err);
+            alert("Impossible d'envoyer le message");
+        }
+    };
+
+    // Favori toggle
+    const handleFavoriteClick = async () => {
+        if (!user) { router.push("/connexion"); return; }
+        if (favoriteId) {
+            await fetch(`http://localhost:3000/favori/${favoriteId}`, { method: "DELETE", credentials:"include" });
+            setFavoriteId(null);
+        } else {
+            const res = await fetch("http://localhost:3000/favori", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
                 credentials: "include",
                 body: JSON.stringify({
                     id_annonce: Number(id),
                     id_utilisateur: user.id_utilisateur,
                 }),
-                });
-                if (res.ok) {
-                    const data = await res.json();
-                    if (data.newFavori && data.newFavori.id_favori) {
-                        setFavoriteId(data.newFavori.id_favori);
-                    }
-                } else {
-                    console.error("Erreur lors de l'ajout du favori");
-                }
-            } catch (error) {
-                console.error("Erreur lors de l'ajout du favori :", error);
+            });
+            if (res.ok) {
+                const data = await res.json();
+                setFavoriteId(data.newFavori.id_favori);
             }
         }
     };
 
-    if (!annonce) return <div>Chargement...</div>;
+    if (!annonce) return <div>Chargement…</div>;
 
     return (
         <div className={styles.annonce}>
@@ -160,7 +132,7 @@ export default function Annonce() {
                     id={annonce.utilisateur.id_utilisateur}
                     lastName={annonce.utilisateur.nom}
                     firstName={annonce.utilisateur.prenom}
-                    link={`/message?seller=${annonce.utilisateur.id_utilisateur}`}
+                    onContact={handleContactClick}
                 />
                 {/* Informations de l'annonce */}
                 <ClassifiedInformations
@@ -175,7 +147,7 @@ export default function Annonce() {
                     onClick={handleFavoriteClick}
                     className={`${styles.favoriteButton} ${
                         favoriteId ? styles.favoriteActive : ""
-                }`}
+                    }`}
                     text={favoriteId ? "❤️ Favori" : "🤍 Ajouter aux favoris"}
                 />
             </div>

@@ -26,7 +26,7 @@ export default function Home() {
           const sortedAnnonces = data.sort((a: any, b: any) =>
             new Date(b.date_creation).getTime() - new Date(a.date_creation).getTime()
           );
-          const latestAnnonces = sortedAnnonces.slice(0, 6);
+          const latestAnnonces = sortedAnnonces.slice(0, 8);
 
           // Pour chaque annonce, on récupère la catégorie et l'utilisateur associés
           const annoncesWithDetails = await Promise.all(
