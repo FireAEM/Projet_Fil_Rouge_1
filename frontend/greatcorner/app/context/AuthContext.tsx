@@ -4,7 +4,8 @@ import React, { createContext, useState, useEffect, ReactNode } from "react";
 
 // Définition d'une interface pour le contexte d'authentification
 interface AuthContextType {
-  user: any;
+  user: any | null;
+  loading: boolean;
   login: (userData: any) => void;
   logout: () => void;
 }
@@ -12,20 +13,17 @@ interface AuthContextType {
 // Valeurs par défaut pour le contexte
 const defaultAuthContext: AuthContextType = {
   user: null,
+  loading: true,
   login: () => {},
   logout: () => {},
 };
 
 export const AuthContext = createContext<AuthContextType>(defaultAuthContext);
 
-interface AuthProviderProps {
-  children: ReactNode;
-}
+export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+  const [user, setUser] = useState<any | null>(null);
+  const [loading, setLoading] = useState(true);
 
-export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
-  const [user, setUser] = useState<any>(null);
-
-  // Charger l'utilisateur depuis le localStorage lors du montage du composant
   useEffect(() => {
     if (typeof window !== "undefined") {
       const storedUser = localStorage.getItem("user");
@@ -33,9 +31,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         try {
           setUser(JSON.parse(storedUser));
         } catch (error) {
-          console.error("Erreur lors du parsing de l'utilisateur stocké :", error);
+          console.error("Erreur de parsing du user :", error);
         }
       }
+      setLoading(false);
     }
   }, []);
 
@@ -52,7 +51,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout }}>
+    <AuthContext.Provider value={{ user, loading, login, logout }}>
       {children}
     </AuthContext.Provider>
   );

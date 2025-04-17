@@ -1,127 +1,149 @@
+// app/dashboard/admin/page.tsx
 "use client";
 
 import React, { useContext, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import IconLinkButton from "@/app/components/IconLinkButton";
+import AdminDashboardClassified from "@/app/dashboard/admin/components/AdminDashboardClassified";
+import AdminDashboardUser from "@/app/dashboard/admin/components/AdminDashboardUser";
 import { AuthContext } from "@/app/context/AuthContext";
 import styles from "./page.module.css";
 
-interface AnnonceType {
-  id_annonce: number;
-  titre: string;
-  description: string;
-  prix: string;
-  localisation: string;
-  image_annonce: string;
-  date_creation: string;
-  categorie: string;
-  id_categorie: number;
-}
+interface AnnonceType { /* ... */ }
+interface UserType { /* ... */ }
 
-interface Utilisateur {
-  id_utilisateur: number;
-  nom: string;
-  prenom: string;
-  email: string;
-  role: string;
-}
-
-const DashboardAdminPage = () => {
-  const { admin } = useContext(AuthContext);
+const AdminDashboardPage: React.FC = () => {
+  const { user, loading: authLoading, logout } = useContext(AuthContext);
   const router = useRouter();
-  const [displayMode, setDisplayMode] = useState<"annonces" | "utilisateurs" | null>(null);
+  const [tab, setTab] = useState<'annonces'|'utilisateurs'>('annonces');
   const [annonces, setAnnonces] = useState<AnnonceType[]>([]);
-  const [utilisateurs, setUtilisateurs] = useState<Utilisateur[]>([]);
+  const [users, setUsers] = useState<UserType[]>([]);
+  const [dataLoading, setDataLoading] = useState(false);
 
-  // Vérifier si l'utilisateur connecté est bien un admin.
- 
-  // Récupérer les données selon le mode d'affichage sélectionné
+  // Auth
   useEffect(() => {
-    if (displayMode === "annonces") {
-      const fetchAnnonces = async () => {
-        try {
-          const res = await fetch("http://localhost:3000/annonce", { credentials: "include" });
-          if (res.ok) {
-            const data = await res.json();
-            setAnnonces(data);
-          } else {
-            console.error("Erreur lors de la récupération des annonces");
-          }
-        } catch (error) {
-          console.error(error);
-        }
-      };
-      fetchAnnonces();
-    } else if (displayMode === "utilisateurs") {
-      const fetchUtilisateurs = async () => {
-        try {
-          const res = await fetch("http://localhost:3000/utilisateur", { credentials: "include" });
-          if (res.ok) {
-            const data = await res.json();
-            setUtilisateurs(data);
-          } else {
-            console.error("Erreur lors de la récupération des utilisateurs");
-          }
-        } catch (error) {
-          console.error(error);
-        }
-      };
-      fetchUtilisateurs();
+    if (authLoading) return;
+    if (!user) {
+      router.push('/connexion');
+    } else if (user.role !== 'admin') {
+      router.push('/dashboard/user');
     }
-  }, [displayMode]);
+  }, [user, authLoading, router]);
+
+  // Data fetch
+  useEffect(() => {
+    if (!user || user.role !== 'admin') return;
+    const fetchData = async () => {
+      setDataLoading(true);
+      // annonces
+      const resA = await fetch('http://localhost:3000/annonce', { credentials:'include' });
+      const listA: AnnonceType[] = await resA.json();
+      const enrichedA = await Promise.all(listA.map(async a => {
+        const [catRes, userRes] = await Promise.all([
+          fetch(`http://localhost:3000/categorie/${a.id_categorie}`),
+          fetch(`http://localhost:3000/annonce/${a.id_annonce}/utilisateur`)
+        ]);
+        const cat = await catRes.json();
+        const usr = await userRes.json();
+        return { ...a, categorie: cat.nom, utilisateur: usr };
+      }));
+      setAnnonces(enrichedA);
+      // utilisateurs
+      const resU = await fetch('http://localhost:3000/utilisateur', { credentials:'include' });
+      const listU: UserType[] = await resU.json();
+      setUsers(listU);
+      setDataLoading(false);
+    };
+    fetchData();
+  }, [user]);
+
+  const deleteAnnonce = async (id: number) => {
+    if (!confirm('Confirmer la suppression ?')) return;
+    await fetch(`http://localhost:3000/annonce/${id}`, { method:'DELETE', credentials:'include' });
+    setAnnonces(prev => prev.filter(a => a.id_annonce !== id));
+  };
+
+  const deleteUser = async (id: number) => {
+    if (!confirm('Confirmer la suppression ?')) return;
+    await fetch(`http://localhost:3000/utilisateur/${id}`, { method:'DELETE', credentials:'include' });
+    setUsers(prev => prev.filter(u => u.id_utilisateur !== id));
+  };
+
+  const handleLogout = () => {
+    if (!confirm('Se déconnecter ?')) return;
+    fetch('http://localhost:3000/utilisateur/deconnexion', { method:'POST', credentials:'include' })
+      .then(() => { logout(); router.push('/connexion'); });
+  };
 
   return (
     <div className={styles.dashboardContainer}>
       <header className={styles.dashboardHeader}>
-        <h1>Tableau de Bord</h1>
-        <div className={styles.buttonContainer}>
-          <button onClick={() => setDisplayMode("annonces")} className={styles.actionButton}>
-            Afficher toutes les annonces
-          </button>
-          <button onClick={() => setDisplayMode("utilisateurs")} className={styles.actionButton}>
-            Afficher tous les utilisateurs
-          </button>
-        </div>
+        <h1>Administration</h1>
       </header>
-
-      <main className={styles.dashboardContent}>
-        {displayMode === "annonces" && (
-          <div className={styles.dataContainer}>
-            <h2>Toutes les annonces</h2>
-            {annonces.length > 0 ? (
-              annonces.map((annonce) => (
-                <div key={annonce.id_annonce} className={styles.dataItem}>
-                  <h3>{annonce.titre}</h3>
-                  <p>{annonce.description}</p>
-                  <p>Prix : {annonce.prix} €</p>
-                  <p>Localisation : {annonce.localisation}</p>
-                </div>
-              ))
-            ) : (
-              <p>Aucune annonce trouvée.</p>
-            )}
-          </div>
-        )}
-
-        {displayMode === "utilisateurs" && (
-          <div className={styles.dataContainer}>
-            <h2>Tous les utilisateurs</h2>
-            {utilisateurs.length > 0 ? (
-              utilisateurs.map((usr) => (
-                <div key={usr.id_utilisateur} className={styles.dataItem}>
-                  <h3>
-                    {usr.nom} {usr.prenom}
-                  </h3>
-                  <p>Email : {usr.email}</p>
-                </div>
-              ))
-            ) : (
-              <p>Aucun utilisateur trouvé.</p>
-            )}
-          </div>
-        )}
-      </main>
+  
+      <div className={styles.dashboardContent}>
+        <div className={styles.sidebar}>
+          <IconLinkButton
+            image="/images/annonce.png"
+            imageAlt="Annonces"
+            title="Annonces"
+            onClick={() => setTab('annonces')}
+          />
+          <IconLinkButton
+            image="/images/utilisateur.png"
+            imageAlt="Utilisateurs"
+            title="Utilisateurs"
+            onClick={() => setTab('utilisateurs')}
+          />
+          <IconLinkButton
+            image="/images/deconnexion.png"
+            imageAlt="Déconnexion"
+            title="Se déconnecter"
+            onClick={handleLogout}
+          />
+        </div>
+  
+        <div className={styles.content}>
+          {(authLoading || dataLoading) && <p>Chargement...</p>}
+          
+          {!authLoading && !dataLoading && tab === 'annonces' && (
+            <div className={styles.list}>
+              {annonces.map(a => (
+                <AdminDashboardClassified
+                  key={a.id_annonce}
+                  id={a.id_annonce}
+                  title={a.titre}
+                  category={a.categorie}
+                  location={a.localisation}
+                  price={parseFloat(a.prix)}
+                  image={`/images/${a.image_annonce}`}
+                  firstName={a.utilisateur?.prenom}
+                  lastName={a.utilisateur?.nom}
+                  creationDate={new Date(a.date_creation)}
+                  onButtonClick={() => deleteAnnonce(a.id_annonce)}
+                />
+              ))}
+            </div>
+          )}
+  
+          {!authLoading && !dataLoading && tab === 'utilisateurs' && (
+            <div className={styles.list}>
+              {users.map(u => (
+                <AdminDashboardUser
+                  key={u.id_utilisateur}
+                  firstName={u.prenom}
+                  lastName={u.nom}
+                  email={u.email}
+                  role={u.role}
+                  onButtonClick={() => deleteUser(u.id_utilisateur)}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
     </div>
-  );
+  );  
 };
 
-export default DashboardAdminPage;
+export default AdminDashboardPage;

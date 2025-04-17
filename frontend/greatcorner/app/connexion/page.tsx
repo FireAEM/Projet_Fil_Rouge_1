@@ -11,10 +11,14 @@ const ConnexionPage = () => {
   const { user, login } = useContext(AuthContext);
   const router = useRouter();
 
-  // Si déjà connecté, rediriger immédiatement vers /dashboard
+  // Si déjà connecté, rediriger vers /dashboard
   useEffect(() => {
     if (user) {
-      router.push("/dashboard/user");
+      if (user.role === 'admin') {
+        router.push('/dashboard/admin');
+      } else {
+        router.push('/dashboard/user');
+      }
     }
   }, [user, router]);
 
@@ -38,6 +42,7 @@ const ConnexionPage = () => {
       setErrorMessage("Tous les champs doivent être remplis.");
       return;
     }
+
     setErrorMessage("");
     try {
       const response = await fetch("http://localhost:3000/utilisateur/connexion", {
@@ -49,14 +54,19 @@ const ConnexionPage = () => {
           mot_de_passe: formData.mot_de_passe,
         }),
       });
+
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.message || "Erreur de connexion");
       }
       const data = await response.json();
-      // Mettre à jour le contexte d'authentification si nécessaire
+
       login(data.utilisateur);
-      router.push("/dashboard/user");
+      if (user.role === 'admin') {
+        router.push('/dashboard/admin');
+      } else {
+        router.push('/dashboard/user');
+      }
     } catch (error: any) {
       setErrorMessage(error.message);
     }

@@ -86,10 +86,8 @@ app.post('/utilisateur/deconnexion', (req, res) => {
 app.post('/utilisateur', async (req, res) => {
     try {
         const { nom, prenom, email, mot_de_passe, role } = req.body;
-        // On hash le mot de passe
         const saltRounds = 10;
         const hashedPassword = await bcrypt.hash(mot_de_passe, saltRounds);
-
         const newUser = await Utilisateur.createUser({
             nom,
             prenom,
@@ -97,6 +95,8 @@ app.post('/utilisateur', async (req, res) => {
             mot_de_passe: hashedPassword,
             role
         });
+        // on crée la session immédiatement
+        req.session.userId = newUser.id_utilisateur;
         res.status(201).json({ newUser });
     } catch (error) {
         res.status(500).json({ error: error.message });

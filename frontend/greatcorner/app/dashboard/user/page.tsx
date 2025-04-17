@@ -5,8 +5,6 @@ import { useRouter } from "next/navigation";
 import IconLinkButton from "@/app/components/IconLinkButton";
 import LinkButton from "@/app/components/LinkButton";
 import Form, { FormProps } from "@/app/components/Form";
-// Nous n'utilisons pas FileField ici puisque le composant input pour les fichiers
-// est géré via le champ "InputField" dans Form.tsx.
 import TextArea from "@/app/components/TextArea";
 import { AuthContext } from "@/app/context/AuthContext";
 import styles from "./page.module.css";
@@ -38,39 +36,53 @@ const DashboardUserPage: React.FC = () => {
     localisation: "",
     image: "",
   });
+  const [loading, setLoading] = useState(true);
 
+  // Ne pas rediriger tant que le chargement n'est pas terminé
   useEffect(() => {
-    if (!user) router.push("/connexion");
-  }, [user, router]);
+    if (loading) return;
+    if (!user) {
+      router.push("/connexion");
+    }
+  }, [user, loading, router]);
 
   useEffect(() => {
     const fetchData = async () => {
-      // Récupérer les annonces de l'utilisateur
-      const resA = await fetch(
-        `http://localhost:3000/annonce/utilisateur/${user.id_utilisateur}`,
-        { credentials: "include" }
-      );
-      const dataA: AnnonceType[] = await resA.json();
-      const withCat = await Promise.all(
-        dataA.map(async (a) => {
-          const resC = await fetch(`http://localhost:3000/categorie/${a.id_categorie}`);
-          const cat = await resC.json();
-          return { ...a, categorie: cat.nom };
-        })
-      );
-      setAnnonces(withCat);
-
-      // Récupérer et préparer les catégories
-      const resCats = await fetch("http://localhost:3000/categorie");
-      const cats = await resCats.json();
-      // On ajoute une option par défaut pour forcer le choix
-      setCategories([
-        { id: "", nom: "Sélectionnez une catégorie" },
-        ...cats.map((c: any) => ({ id: c.id_categorie.toString(), nom: c.nom })),
-      ]);
+      try {
+        // Récupérer les annonces de l'utilisateur
+        const resA = await fetch(
+          `http://localhost:3000/annonce/utilisateur/${user.id_utilisateur}`,
+          { credentials: "include" }
+        );
+        let dataA = await resA.json();
+        // Si dataA n'est pas un tableau, on lui affecte un tableau vide
+        if (!Array.isArray(dataA)) {
+          dataA = [];
+        }
+        const withCat = await Promise.all(
+          dataA.map(async (a: AnnonceType) => {
+            const resC = await fetch(`http://localhost:3000/categorie/${a.id_categorie}`);
+            const cat = await resC.json();
+            return { ...a, categorie: cat.nom };
+          })
+        );
+        setAnnonces(withCat);
+  
+        // Récupérer et préparer les catégories
+        const resCats = await fetch("http://localhost:3000/categorie");
+        const cats = await resCats.json();
+        setCategories([
+          { id: "", nom: "Sélectionnez une catégorie" },
+          ...cats.map((c: any) => ({ id: c.id_categorie.toString(), nom: c.nom })),
+        ]);
+      } catch (error) {
+        console.error("Erreur lors de la récupération des données", error);
+      } finally {
+        setLoading(false);
+      }
     };
     if (user) fetchData();
-  }, [user]);
+  }, [user]);  
 
   const onAnnonceClick = (a: AnnonceType) => {
     setSelectedAnnonce(a);
@@ -93,7 +105,7 @@ const DashboardUserPage: React.FC = () => {
     setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
-  // On ajuste le handler pour accepter l'union des types et vérifier que l'on traite bien un input file.
+  // Gestion du champ file
   const onFileChange: React.ChangeEventHandler<
     HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
   > = (e) => {
@@ -131,22 +143,20 @@ const DashboardUserPage: React.FC = () => {
     e.preventDefault();
     setMessages({});
 
-    // Vérifier qu'une catégorie a bien été sélectionnée
     if (!formData.categorie) {
       setMessages({ error: "Veuillez sélectionner une catégorie valide." });
       return;
     }
 
-    // Construction explicite du payload, en n'incluant que les clés attendues par le serveur
     const payload = {
       titre: formData.titre,
       description: formData.description,
-      // Convertir le prix en nombre (parseFloat renvoie NaN si invalide)
       prix: parseFloat(formData.prix),
       localisation: formData.localisation,
-      // Transmettre le nom du fichier pour l'image
       image_annonce: formData.image,
-      date_creation: selectedAnnonce ? selectedAnnonce.date_creation : new Date().toISOString(),
+      date_creation: selectedAnnonce
+        ? selectedAnnonce.date_creation
+        : new Date().toISOString(),
       id_categorie: Number(formData.categorie),
       id_utilisateur: user.id_utilisateur,
     };
@@ -175,12 +185,25 @@ const DashboardUserPage: React.FC = () => {
   const onAdd = () => {
     setSelectedAnnonce(null);
     setMessages({});
-    setFormData({ titre: "", categorie: "", description: "", prix: "", localisation: "", image: "" });
+    setFormData({
+      titre: "",
+      categorie: "",
+      description: "",
+      prix: "",
+      localisation: "",
+      image: "",
+    });
   };
 
   const formConfig: FormProps["data"] = {
     fields: [
-      { id: "titre", label: "Titre", value: formData.titre, onChange: onFormChange, required: true },
+      { 
+        id: "titre",
+        label: "Titre",
+        value: formData.titre,
+        onChange: onFormChange,
+        required: true
+      },
       {
         id: "categorie",
         label: "Catégorie",
@@ -198,10 +221,27 @@ const DashboardUserPage: React.FC = () => {
         onChange: onFormChange,
         required: true,
       },
-      { id: "prix", label: "Prix", type: "number", value: formData.prix, onChange: onFormChange, required: true },
-      { id: "localisation", label: "Localisation", type: "text", value: formData.localisation, onChange: onFormChange, required: true },
-      // Pour l'image, on ne passe pas de "value" afin d'éviter les erreurs d'hydratation et de compatibilité browsers
-      { id: "image", label: "Image", type: "file", onChange: onFileChange },
+      {
+        id: "prix",
+        label: "Prix",
+        type: "number",
+        value: formData.prix,
+        onChange: onFormChange,
+        required: true
+      },
+      { id: "localisation",
+        label: "Localisation",
+        type: "text",
+        value: formData.localisation,
+        onChange: onFormChange,
+        required: true
+      },
+      {
+        id: "image",
+        label: "Image",
+        type: "file",
+        onChange: onFileChange
+      },
     ],
     buttons: [
       {
@@ -217,7 +257,11 @@ const DashboardUserPage: React.FC = () => {
     <div className={styles.dashboardContainer}>
       <div className={styles.dashboardHeader}>
         <h1>Mes annonces</h1>
-        <LinkButton text="➕ Ajouter une annonce" buttonType="button" onClick={onAdd} />
+        <LinkButton
+          text="➕ Ajouter une annonce"
+          buttonType="button"
+          onClick={onAdd}
+        />
         <IconLinkButton
           image="/images/utilisateur.png"
           imageAlt="Utilisateur"

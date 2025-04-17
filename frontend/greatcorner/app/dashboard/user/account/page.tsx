@@ -12,24 +12,23 @@ const DashboardUserAccountPage = () => {
     const { user, logout } = useContext(AuthContext);
     const router = useRouter();
     const [errorMessage, setErrorMessage] = useState("");
+    const [loading, setLoading] = useState(true);
 
     // Si l'utilisateur n'est pas connecté, rediriger vers /connexion
     useEffect(() => {
-        if (!user) {
-            router.push("/connexion");
-        }
-    }, [user, router]);
+        if (loading) return;
+        if (!user) router.push('/connexion');
+      }, [user, loading, router]);
 
-    // Assurez-vous d'initialiser le formulaire avec les données existantes de l'utilisateur
     const [userFormData, setUserFormData] = useState({
         nom: user?.nom || "",
         prenom: user?.prenom || "",
         email: user?.email || "",
-        mot_de_passe: "", // Laisser vide s'il n'est pas modifié
-        role: user?.role || "client", // important de conserver le rôle
+        mot_de_passe: "",
+        role: user?.role || "client",
     });
 
-    // Remarque : pour gérer correctement la modification, on étend le type de handleChange
+    // Pour gérer correctement la modification
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
         setUserFormData((prev) => ({ ...prev, [name]: value }));
@@ -53,7 +52,7 @@ const DashboardUserAccountPage = () => {
                 email: userFormData.email,
                 // Envoyer le mot de passe uniquement s'il a été modifié
                 ...(userFormData.mot_de_passe && { mot_de_passe: userFormData.mot_de_passe }),
-                role: userFormData.role, // Conserver le rôle existant
+                role: userFormData.role,
                 }),
             });
             if (!res.ok) {
@@ -112,7 +111,7 @@ const DashboardUserAccountPage = () => {
         ],
     };
 
-    // Fonction pour la suppression du compte avec confirmation
+    // Suppression du compte
     const handleDeleteAccount = async () => {
         if (window.confirm("Voulez-vous vraiment supprimer votre compte ? Cette action est irréversible.")) {
             try {
@@ -132,7 +131,7 @@ const DashboardUserAccountPage = () => {
         }
     };
 
-    // Confirmation de déconnexion
+    // Déconnexion
     const handleLogout = () => {
         if (window.confirm("Voulez-vous vraiment vous déconnecter ?")) {
             logout();
@@ -142,7 +141,6 @@ const DashboardUserAccountPage = () => {
 
     return (
         <div className={styles.accountContainer}>
-            {/* En-tête */}
             <div className={styles.accountHeader}>
                 <h1>Mon compte</h1>
                 <LinkButton
@@ -160,7 +158,6 @@ const DashboardUserAccountPage = () => {
             </div>
 
             <div className={styles.accountContent}>
-                {/* Sidebar avec liens pour Mes informations, Déconnexion et Suppression du compte */}
                 <div className={styles.sidebar}>
                     <IconLinkButton
                         image="/images/utilisateur.png"
