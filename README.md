@@ -1,4 +1,3 @@
-```markdown
 # GreatCorner — Projet Fil Rouge 1
 
 > **GreatCorner** est une plateforme de petites annonces, développée en **Node.js** (backend) et **Next.js** (frontend), avec une base de données **PostgreSQL**.
@@ -15,7 +14,7 @@
 
 ## 📂 Structure du projet
 
-```
+```bash
 Projet_Fil_Rouge_1/
 ├─ backend/                            # Backend Express
 │  ├─ models/                          # Accès BDD
@@ -23,7 +22,7 @@ Projet_Fil_Rouge_1/
 │  └─ .env                             # Variables d’environnement pour le backend
 ├─ database/                           # Fichiers BDD PostgreSQL
 │     ├─ greatcorner.sql               # Scripts de création des tables
-│     └─ greatcorner_data_test.sql    # Données de test
+│     └─ greatcorner_data_test.sql      # Données de test
 ├─ frontend/greatcorner/               # Frontend Next.js
 │  ├─ app/                             # Composants et pages
 │  └─ public/                          # Assets (images, logos…)
@@ -45,7 +44,7 @@ cd Projet_Fil_Rouge_1
 
 Créez un fichier `.env` ou dans `backend/` contenant :
 
-```dotenv
+```bash
 # Database
 DB_HOST=[à compléter]
 DB_USER=[à compléter]
@@ -56,8 +55,8 @@ DB_PORT=5432
 
 ### 3. Initialiser la base de données
 
-1. Démarrez PostgreSQL et connectez‑vous (pgAdmin, psql…).
-2. Créez une base de données `greatcorner_projet_fil_rouge` (ou adaptez `DB_NAME` dans `.env`).
+1. Démarrez PostgreSQL et connectez‑vous (pgAdmin, psql…).  
+2. Créez une base de données `greatcorner_projet_fil_rouge` (ou adaptez `DB_NAME` dans `.env`).  
 3. Exécutez le script de création de schéma :
 
    ```bash
@@ -84,7 +83,7 @@ npm install
 #### Frontend
 
 ```bash
-cd ../frontend/greatcorner
+cd frontend/greatcorner
 npm install
 ```
 
@@ -101,7 +100,7 @@ node index.js
 #### Frontend
 Passez au dossier `/frontend/greatcorner` et lancez l’application Next.js :  
 ```bash
-cd ../frontend/greatcorner
+cd frontend/greatcorner
 npm run dev
 # accès sur http://localhost:3005
 ```
@@ -110,8 +109,8 @@ npm run dev
 
 ## 🌐 Points d’accès
 
-- **API** : `http://localhost:3000`
-- **Frontend** : `http://localhost:3005`
+- **API** : [`http://localhost:3000`](http://localhost:3000)
+- **Frontend** : [`http://localhost:3005`](http://localhost:3005)
 
 ---
 
