@@ -22,7 +22,7 @@ Projet_Fil_Rouge_1/
 │  └─ .env                             # Variables d’environnement pour le backend
 ├─ database/                           # Fichiers BDD PostgreSQL
 │     ├─ greatcorner.sql               # Scripts de création des tables
-│     └─ greatcorner_data_test.sql      # Données de test
+│     └─ greatcorner_data_test.sql     # Données de test
 ├─ frontend/greatcorner/               # Frontend Next.js
 │  ├─ app/                             # Composants et pages
 │  └─ public/                          # Assets (images, logos…)
@@ -36,7 +36,7 @@ Projet_Fil_Rouge_1/
 ### 1. Cloner le dépôt
 
 ```bash
-git clone https://github.com/FireAEM/Projet_Fil_Rouge_1.git
+git clone https://github.com/FireAEM/Projet_Fil_Rouge_1
 cd Projet_Fil_Rouge_1
 ```
 
@@ -128,4 +128,4 @@ npm run dev
 - Création, modification, suppression d’annonces
 - Filtres et recherche (titre, catégorie, prix, tri)
 - Favoris, messagerie interne (envoi automatique de message au vendeur)
-- Dashboard client (mes annonces) et admin (gestion des annonces et utilisateurs)
+- Dashboard client (gestion des annonces et compte) et admin (gestion des annonces et utilisateurs)
